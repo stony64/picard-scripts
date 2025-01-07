@@ -157,7 +157,7 @@ $noop(
 -------------------------------------------------------------------------- 
 # *** Beispiele / Anleitung ***
 # Beispiel mit Amy Winehouse und dem Album "Back to Black":
-# Standardausgabe: /AUDIO/ARTIST/MP3/~ A ~/Amy Winehouse/[2007]/Back to Black/01-01 Rehab.mp3 
+# Standardausgabe: /AUDIO/ARTISTS/MP3/~ A ~/Amy Winehouse/[2007]/Back to Black/01-01 Rehab.mp3 
 # Wähle die Option 1, 2 oder 3 für unterschiedliche Ausgabeformate:
 -------------------------------------------------------------------------- 
 )
