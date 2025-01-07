@@ -1,0 +1,178 @@
+$noop(
+-------------------------------------------------------------------------- 
+#                                                                      
+#  Musicbrainz Picard 
+#  File Naming Script 
+#  
+#  Stony64                                                  
+#                                                                      
+#  License: GPLv3.0                                          
+#  Date: 2025-01-06                                                                     
+#
+-------------------------------------------------------------------------- 
+)
+
+$noop(  
+-------------------------------------------------------------------------- 
+###
+!!! DO NOT EDIT THE AREA BELOW | EDITABLE AREA IS AT THE END !!!
+###
+-------------------------------------------------------------------------- 
+)
+
+$noop(  
+-------------------------------------------------------------------------- 
+# *** Sonderzeichen und Umlaute ersetzen ***
+# Ersetzt Sonderzeichen und Umlaute in den Album- und Track-Künstlernamen,
+# die im Dateinamen und Pfad verwendet werden. Sonderzeichen wie : * ? " < > |
+# werden durch Bindestriche ersetzt, und Umlaute `ö, ü, ä, etc.` werden durch
+# die entsprechenden ASCII-Äquivalente `ae, oe, ue` ersetzt.
+-------------------------------------------------------------------------- 
+)
+$foreach(Mainfolder1; Mainfolder2; Mainfolder3; Artist1; Artist2; Artist3; Album1; Album2; Album3; PreTitle1; PreTitle2; Title,
+    $set(%_loop_value%, $get(%_loop_value%))
+
+    # Entfernen von Punkten und Unterstrichen am Ende
+    $set(%_loop_value%,$rreplace($get(%_loop_value%),[._]*\$,))
+    
+    # Ersetzen von Sonderzeichen durch -
+    $set(%_loop_value%, $rreplace($get(%_loop_value%), "[:*?\\"<>|\,]", "-"))
+    $set(%_loop_value%, $rreplace($get(%_loop_value%), "\)", ""))
+
+    # Umwandlung von Umlauten und ß
+    $set(%_loop_value%, $rreplace($get(%_loop_value%), "ö", "oe"))
+    $set(%_loop_value%, $rreplace($get(%_loop_value%), "ü", "ue"))
+    $set(%_loop_value%, $rreplace($get(%_loop_value%), "ä", "ae"))
+    $set(%_loop_value%, $rreplace($get(%_loop_value%), "Ö", "Oe"))
+    $set(%_loop_value%, $rreplace($get(%_loop_value%), "Ü", "Ue"))
+    $set(%_loop_value%, $rreplace($get(%_loop_value%), "Ä", "Ae"))
+    $set(%_loop_value%, $rreplace($get(%_loop_value%), "ß", "ss"))
+)
+
+$noop(
+-------------------------------------------------------------------------- 
+# *** Disc- und Tracknummern mit führenden Nullen auffüllen ***
+# Die Discnummer und Tracknummer werden mit führenden Nullen auf die
+# Mindestlänge `%_PaddedDiscNumMinLength%` und `%_PaddedTrackNumMinLength%` 
+# aufgefüllt, um konsistente Formatierung wie 01-01 oder 10-02 zu gewährleisten.
+-------------------------------------------------------------------------- 
+)
+$set(_PaddedDiscNumMinLength,2)
+$set(_PaddedTrackNumMinLength,2)
+
+$noop(
+-------------------------------------------------------------------------- 
+# *** Speicherpfad für MP3-Dateien ***
+# Definiert den Speicherpfad für die MP3-Dateien. Der Platzhalter `%grouping%`
+# kann verwendet werden, um eine benutzerdefinierte Ordnerstruktur zu definieren.
+# Der Pfad wird mit `MP3` oder `FLAC` kombiniert.
+-------------------------------------------------------------------------- 
+)
+$set(RootFolder1,AUDIO/[%grouping%]/MP3/)
+$set(RootFolder2,AUDIO/[%grouping%]/FLAC/)
+
+$noop(
+--------------------------------------------------------------------------
+# *** Hauptordnerstruktur ***
+# MainFolder1: Erstellt den Ordner basierend auf dem ersten Buchstaben des 
+# Albumkünstlers Sortierung nach Vorname Nachname. Wenn der Albumkünstler
+# mit einer Ziffer beginnt, wird stattdessen `#` verwendet.
+# MainFolder2: Nutzt den Sortiernamen des Albumkünstlers `%albumartistsort%`,
+# wenn vorhanden, um nach Nachname, Vorname zu sortieren. Wenn der Sortiername
+# mit einer Ziffer beginnt, wird stattdessen `#` verwendet.
+--------------------------------------------------------------------------
+)
+$set(MainFolder1, ~ $if($rsearch($left(%albumartist%,1),^[0-9]),#, $upper($left(%albumartist%,1))) ~/)
+$set(MainFolder2, ~ $if($rsearch($left($if2(%albumartistsort%,%albumartist%),1),^[0-9]),#, $upper($left($if2(%albumartistsort%,%albumartist%),1))) ~/)
+$set(MainFolder3,)
+
+$noop(
+-------------------------------------------------------------------------- 
+# *** Artist-Schreibweise ***
+# Artist1: Verwendet den Albumkünstlernamen `%albumartist%` ohne zusätzliche Bearbeitung.
+# Artist2: Verwendet den Sortiernamen `%albumartistsort%`, wenn dieser vorhanden ist.
+-------------------------------------------------------------------------- 
+)
+$set(Artist1, %albumartist%/)
+$set(Artist2, $if2(%albumartistsort%,%albumartist%)/)
+
+$noop(
+-------------------------------------------------------------------------- 
+# *** Album-Schreibweise ***
+# Album1: Erzeugt den Albumnamen mit Jahr am Ende falls vorhanden. "Unknown Year" wird verwendet, wenn kein Jahr angegeben ist. 
+# Album2: Fügt das Jahr am Anfang hinzu, wenn verfügbar. "Unknown Year" wird verwendet, wenn keine Angabe.
+# Album3: Der reine Albumnamen ohne Jahr.
+-------------------------------------------------------------------------- 
+)
+$set(Album1,$if(%date%,$if(%album%, )[$if2($left(%date%,4),Unknown Year)] %album%/))
+$set(Album2,$if(%date%,$if(%album%, %album% )[$if2($left(%date%,4),Unknown Year)])/)
+$set(Album3,%album%)
+
+$noop(
+-------------------------------------------------------------------------- 
+# *** Ordnerstruktur bei mehreren Discs ***
+# MultiDisc1: Erstellt Unterordner für Alben mit mehreren Discs, z.B. "CD01", "CD02" etc.
+# MultiDisc2: Platzhalter für alternative Benennungsregeln.
+-------------------------------------------------------------------------- 
+)
+$set(MultiDisc1,$if($gt(%totaldiscs%,1),CD $num(%discnumber%,%_PaddedDiscNumMinLength%)/))
+$set(MultiDisc2,)
+
+$noop( 
+-------------------------------------------------------------------------- 
+# *** Präfix-Titel für das Album ***
+# PreTitle1: Generiert den Dateinamen-Titel mit Künstler und Albumnamen.
+# PreTitle2: Platzhalter für alternative Präfix-Titel-Generierung `derzeit leer`.
+-------------------------------------------------------------------------- 
+)
+$set(PreTitle1,%albumartist% - %album% - )
+$set(PreTitle2,)
+
+$noop(
+-------------------------------------------------------------------------- 
+# *** Tracknummern für Dateinamen ***
+# Track1: Erzeugt den Dateinamen nur mit der Tracknummer.
+# Track2: Erzeugt den Dateinamen mit Discnummer und Tracknummer.
+-------------------------------------------------------------------------- 
+)
+$set(Track1, $num(%tracknumber%,%_PaddedTrackNumMinLength%) )
+$set(Track2, $num(%discnumber%,%_PaddedDiscNumMinLength%)-$num(%tracknumber%,%_PaddedTrackNumMinLength%) )
+
+$noop(
+-------------------------------------------------------------------------- 
+# *** Titel des Tracks ***
+-------------------------------------------------------------------------- 
+)
+$set(Title,%title%)
+
+$noop(  
+------------------------------------------------------------------------------------------
+###
+!!! DO NOT EDIT THE AREA ABOVE | EDITABLE AREA IS JUST BELOW !!!
+###
+------------------------------------------------------------------------------------------
+)
+
+$noop(
+-------------------------------------------------------------------------- 
+# *** Beispiele / Anleitung ***
+# Beispiel mit Amy Winehouse und dem Album "Back to Black":
+# Standardausgabe: /AUDIO/ARTIST/MP3/~ A ~/Amy Winehouse/[2007] Back to Black/01-01 - Rehab.mp3 
+# Wähle die Option 1, 2 oder 3 für unterschiedliche Ausgabeformate:
+-------------------------------------------------------------------------- 
+)
+%RootFolder1%	 	$noop( RootFolder: Speicherpfad nach Datei-Endung
+						1: MP3-Dateien | 2: FLAC-Dateien )
+%MainFolder1%		$noop( Mainfolder: Speicherpfad Sortierung nach Vor- oder Nachname 
+						1: nach Vorname ~ A ~ | 2: wenn Albumsort vorhanden, dann Nachname ~ W ~ | 3: Keine einzelnen Buchstabenordner )
+%Artist1%			$noop( Artist: Vor- oder Nachname zuerst 
+						1: Amy Winehouse | 2: Winehouse, Amy )
+%Album2%			$noop( Jahresangabe für das Album: 
+						1: YEAR am Anfang [2007] Back to Black | 2: YEAR am Ende Back to Black [2007] | 3: kein YEAR Verwenden Back to Black )
+%MultiDisc2%		$noop( MultiDisc: CD-Angabe mit Anzahl einfügen CD01 CD02..., erzeugt Unterordner
+						1: mit "CDXX" | 2: keine Ausgabe von "CDXX" )
+%PreTitle2%		$noop(PreTitle: generiert Dateinmae mit oder ohne Angabe des Artist mit Album
+						1: mit Artist - Album | 2: keine Angabe )
+%Track2%			$noop( Track: Anzeige von Trachnummer mit CD-Nummer oder ohne
+						1: Anzeige ohne CD_Nummer 01 | 2: mit Anzeige der CD-Nummer 01-01 bei Disc 1, 02-01 bei Disc 2 )
+%Title%			$noop( Titel des Tracks )
