@@ -1,0 +1,26 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Standardkonfiguration für alle Dateien[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Spezifische Konfiguration für Markdown-Dateien
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false
+
+# Spezifische Konfiguration für Bash-Skripte
+[*.sh]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
