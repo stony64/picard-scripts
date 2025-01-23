@@ -1,13 +1,13 @@
 $noop(
 -------------------------------------------------------------------------- 
-#                                                                      
-#  Musicbrainz Picard 
-#  File Naming Script 
-#  
-#  Stony64                                                  
-#                                                                      
-#  License: MIT License                                         
-#  Date: 2025-01-06                                                                     
+#
+#   Musicbrainz Picard 
+#   File Naming Script 
+#
+#   Stony64 
+#
+#   License: MIT License
+#   Date: 2025-01-06 
 #
 -------------------------------------------------------------------------- 
 )
@@ -15,36 +15,42 @@ $noop(
 $noop(  
 -------------------------------------------------------------------------- 
 ###
-!!! DO NOT EDIT THE AREA BELOW | EDITABLE AREA IS AT THE END !!!
+### !!! DO NOT EDIT THE AREA BELOW | EDITABLE AREA IST AM ENDE !!!
+### !!! NICHT DEN BEREICH UNTEN BEARBEITEN | BEARBEITBARER BEREICH IST AM ENDE !!!
 ###
 -------------------------------------------------------------------------- 
 )
 
 $noop(  
 -------------------------------------------------------------------------- 
-#   Replace Umlauts - 
-#   Ersetzt Umlaute        
+#   Replace Umlauts -
+#   Ersetzt Umlaute
 -------------------------------------------------------------------------- 
-
 )
 $foreach(MainFolder1; MainFolder2; MainFolder3; Artist1; Artist2; Artist3; Album1; Album2; Album3; PreTitle1; PreTitle2; Title,
-    $set(%_loop_value%, $get(%_loop_value%))
-
+$noop(    
+    # Remove trailing dots and underscores
     # Entfernen von Punkten und Unterstrichen am Ende
-    $set(%_loop_value%,$replace($get(%_loop_value%),[._]*\$,))
-    
+)
+    $set(%_loop_value%,$get(%_loop_value%))
+$noop( 
+    # Replace special characters with -
     # Ersetzen von Sonderzeichen durch -
-    $set(%_loop_value%, $replace($get(%_loop_value%), "[:*?\\"<>|\,]", "-"))
-    $set(%_loop_value%, $replace($get(%_loop_value%), "\)", ""))
-
+)
+    $set(%_loop_value%,$replace($get(%_loop_value%),"[:*?\\"<>|\,]","-"))
+    $set(%_loop_value%,$replace($get(%_loop_value%),"\)",""))
+$noop(
+    # Convert umlauts and ß
     # Umwandlung von Umlauten und ß
-    $set(%_loop_value%, $replace($get(%_loop_value%), "ö", "oe"))
-    $set(%_loop_value%, $replace($get(%_loop_value%), "ü", "ue"))
-    $set(%_loop_value%, $replace($get(%_loop_value%), "ä", "ae"))
-    $set(%_loop_value%, $replace($get(%_loop_value%), "Ö", "Oe"))
-    $set(%_loop_value%, $replace($get(%_loop_value%), "Ü", "Ue"))
-    $set(%_loop_value%, $replace($get(%_loop_value%), "Ä", "Ae"))
-    $set(%_loop_value%, $replace($get(%_loop_value%), "ß", "ss"))
+)
+    $set(%_loop_value%,$replace($get(%_loop_value%),"ö","oe"))
+    $set(%_loop_value%,$replace($get(%_loop_value%),"ü","ue"))
+    $set(%_loop_value%,$replace($get(%_loop_value%),"ä","ae"))
+    $set(%_loop_value%,$replace($get(%_loop_value%),"Ö","Oe"))
+    $set(%_loop_value%,$replace($get(%_loop_value%),"Ü","Ue"))
+    $set(%_loop_value%,$replace($get(%_loop_value%),"Ä","Ae"))
+    $set(%_loop_value%,$replace($get(%_loop_value%),"ß","ss"))
+)
 
 $noop( 
 -------------------------------------------------------------------------- 
@@ -59,13 +65,11 @@ $noop(
 -------------------------------------------------------------------------- 
 #   Define root folders for MP3 and FLAC files based on grouping -
 #   Definiere Stammordner für MP3- und FLAC-Dateien basierend auf der Gruppierung
-#
-#   TESTFOLDER:
-#   $set(RootFolder1,[~TEST~]/[$upper(%grouping%)]/MP3/)
 -------------------------------------------------------------------------- 
 )
 $set(RootFolder1,[~AUDIO~]/[$upper(%grouping%)]/MP3/)
 $set(RootFolder2,[~AUDIO~]/[$upper(%grouping%)]/FLAC/)
+
 
 $noop(
 --------------------------------------------------------------------------
@@ -73,9 +77,8 @@ $noop(
 #   Definiere Hauptordner basierend auf dem ersten Buchstaben des Albumkünstlers 
 --------------------------------------------------------------------------
 )
-$set(MainFolder1, ~ $if($rsearch($left(%albumartist%,1),^[0-9]),#, $upper($left(%albumartist%,1))) ~/)
-$set(MainFolder2, ~ $if($rsearch($left($if2(%albumartistsort%,%albumartist%),1),^[0-9]),#, $upper($left($if2(%albumartistsort%,%albumartist%),1))) ~/)
-$set(MainFolder3,)
+$set(MainFolder1,~ $if($rsearch($left(%albumartist%,1),^[0-9]),#, $upper($left(%albumartist%,1))) ~/)
+$set(MainFolder2,~ $if($rsearch($left($if2(%albumartistsort%,%albumartist%),1),^[0-9]),#, $upper($left($if2(%albumartistsort%,%albumartist%),1))) ~/)
 
 $noop(
 -------------------------------------------------------------------------- 
@@ -92,9 +95,8 @@ $noop(
 #   Definiere Albumordner mit Datum und Albumname
 -------------------------------------------------------------------------- 
 )
-$set(Album1,$if(%originaldate%,$if(%album%, )[$if2($left(%originaldate%,4),Unknown Year)] %album%/))
-$set(Album2,$if(%originaldate%,$if(%album%, %album% )[$if2($left(%originaldate%,4),Unknown Year)])/)
-$set(Album3,%album%)
+$set(Album1,$if(%originalyear%,$if(%album%, )[$if2($left(%originalyear%,4),Unknown Year)] %album%/))
+$set(Album2,$if(%originalyear%,$if(%album%, %album% )[$if2($left(%originalyear%,4),Unknown Year)])/)
 
 $noop(
 -------------------------------------------------------------------------- 
@@ -134,8 +136,9 @@ $set(Title,%title%)
 $noop( 
 -------------------------------------------------------------------------- 
 #   Set main folder and artist based on grouping for classical music -
-#   Setze Hauptordner und Künstler basierend auf der Gruppierung für klassische Musik )
+#   Setze Hauptordner und Künstler basierend auf der Gruppierung für klassische Musik 
 -------------------------------------------------------------------------- 
+)
 $if($rsearch(%grouping%,Klassik),
     $set(MainFolder,%MainFolder2%)
     $set(Artist,%Artist2%)
@@ -144,8 +147,9 @@ $if($rsearch(%grouping%,Klassik),
 $noop(
 --------------------------------------------------------------------------  
 #   Set main folder and artist for non-classical music -
-#   Setze Hauptordner und Künstler für nicht-klassische Musik )
--------------------------------------------------------------------------- 
+#   Setze Hauptordner und Künstler für nicht-klassische Musik 
+--------------------------------------------------------------------------
+) 
 $if($not($rsearch(%grouping%,Klassik)),
     $set(MainFolder,%MainFolder1%)
     $set(Artist,%Artist1%)
@@ -154,7 +158,8 @@ $if($not($rsearch(%grouping%,Klassik)),
 $noop(  
 ------------------------------------------------------------------------------------------
 ###
-!!! DO NOT EDIT THE AREA ABOVE | EDITABLE AREA IS JUST BELOW !!!
+### !!! DO NOT EDIT THE AREA ABOVE | EDITABLE AREA IS JUST BELOW !!!
+### !!! NICHT DEN BEREICH OBEN BEARBEITEN | BEARBEITBARER BEREICH IST UNTEN !!!
 ###
 ------------------------------------------------------------------------------------------
 )
@@ -164,24 +169,58 @@ $noop(
 #   Output the final path -
 #   Ausgabe des endgültigen Pfads 
 #
-# *** Beispiele / Anleitung ***
-# Beispiel mit Amy Winehouse und dem Album "Back to Black":
-# Standardausgabe: /AUDIO/ARTISTS/MP3/~ A ~/Amy Winehouse/[2007]/Back to Black/01-01 Rehab.mp3 
-# Wähle die Option 1, 2 oder 3 für unterschiedliche Ausgabeformate:
+#   Example with Amy Winehouse and the album "Back to Black":
+#   Standard output: /AUDIO/ARTISTS/MP3/~ A ~/Amy Winehouse/[2007]/Back to Black/01-01 Rehab.mp3
+#   Choose option 1, 2, or 3 for different output formats: -
+#
+#   Beispiel mit Amy Winehouse und dem Album "Back to Black":
+#   Standardausgabe: /AUDIO/ARTISTS/MP3/~ A ~/Amy Winehouse/[2007]/Back to Black/01-01 Rehab.mp3
+#   Wähle die Option 1, 2 oder 3 für unterschiedliche Ausgabeformate:
+
+%RootFolder%:   Storage path by file extension
+      			    1: MP3 files   		| 2: FLAC files 
+       		    Speicherpfad nach Datei-Endung
+       			    1: MP3-Dateien 	| 2: FLAC-Dateien 
+
+%Mainfolder%:   Storage path sorted by first or last name 
+       			    1: by first name ~ A ~ 	| 2: if album sort is available, then by last name ~ W ~ 		| 3: No individual letter folders 
+                Speicherpfad Sortierung nach Vor- oder Nachname 
+       			    1: nach Vorname ~ A ~  	| 2: wenn Albumsort vorhanden, dann Nachname ~ W ~  		| 3: Keine einzelnen Buchstabenordner
+
+%Artist%:       First or last name first 
+       	            1: Amy Winehouse | 2: Winehouse, Amy 
+                Vor- oder Nachname zuerst 
+        	        1: Amy Winehouse | 2: Winehouse, Amy 
+
+%Album%:        Year for the album: 
+           	        1: YEAR at the beginning [2007] Back to Black 	| 2: YEAR at the end Back to Black [2007] 	| 3: do not use YEAR Back to Black 
+                Jahresangabe für das Album: 
+           	        1: YEAR am Anfang [2007] Back to Black        	| 2: YEAR am Ende Back to Black [2007]    	| 3: kein YEAR Verwenden Back to Black
+
+%MultiDisc%:    Insert CD information with number CD01 CD02..., creates subfolders
+           	        1: with "CDXX" | 2: no output of "CDXX" 
+                CD-Angabe mit Anzahl einfügen CD01 CD02..., erzeugt Unterordner
+           	        1: mit "CDXX"  | 2: keine Ausgabe von "CDXX"
+
+%PreTitle%:     generates file names with or without artist and album information
+           	        1: with Artist - Album | 2: no information 
+                generiert Dateinamen mit oder ohne Angabe des Artist mit Album
+           	        1: Mit Artist - Album  | 2: keine Angabe 
+
+%Track%:        Display track number with or without CD number
+           	        1: Display without CD number 01 	| 2: with CD number display 01-01 for disc 1, 02-01 for disc 2 
+                Anzeige von Trachnummer mit CD-Nummer oder ohne
+           	        1: Anzeige ohne CD_Nummer 01    	| 2: mit Anzeige der CD-Nummer 01-01 bei Disc 1, 02-01 bei Disc 2
+
+%Title%:        Track title 
+                Titel des Tracks 
 -------------------------------------------------------------------------- 
 )
-%RootFolder1%	 	$noop( RootFolder: Speicherpfad nach Datei-Endung
-						1: MP3-Dateien | 2: FLAC-Dateien )
-%MainFolder1%		$noop( Mainfolder: Speicherpfad Sortierung nach Vor- oder Nachname 
-						1: nach Vorname ~ A ~ | 2: wenn Albumsort vorhanden, dann Nachname ~ W ~ | 3: Keine einzelnen Buchstabenordner )
-%Artist1%			$noop( Artist: Vor- oder Nachname zuerst 
-						1: Amy Winehouse | 2: Winehouse, Amy )
-%Album2%			$noop( Jahresangabe für das Album: 
-						1: YEAR am Anfang [2007] Back to Black | 2: YEAR am Ende Back to Black [2007] | 3: kein YEAR Verwenden Back to Black )
-%MultiDisc2%		$noop( MultiDisc: CD-Angabe mit Anzahl einfügen CD01 CD02..., erzeugt Unterordner
-						1: mit "CDXX" | 2: keine Ausgabe von "CDXX" )
-%PreTitle2%		$noop(PreTitle: generiert Dateinmae mit oder ohne Angabe des Artist mit Album
-						1: mit Artist - Album | 2: keine Angabe )
-%Track2%			$noop( Track: Anzeige von Trachnummer mit CD-Nummer oder ohne
-						1: Anzeige ohne CD_Nummer 01 | 2: mit Anzeige der CD-Nummer 01-01 bei Disc 1, 02-01 bei Disc 2 )
-%Title%			$noop( Titel des Tracks )
+%RootFolder1%
+%MainFolder1%
+%Artist1%
+%Album1%
+%MultiDisc2%
+%PreTitle2%
+%Track2%
+%Title%
